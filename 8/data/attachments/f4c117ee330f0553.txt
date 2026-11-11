@@ -1,0 +1,4 @@
+{ message: 'Password update successed!' }
+{
+  "message": "Password update successed!"
+}
