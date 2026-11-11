@@ -1,0 +1,23 @@
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+playwright/.auth/
+test-data/
+allure-results/
+allure-report/
+screenshots/
+temp/
+
+# =========================================
+# AUTH / STORAGE STATE (IMPORTANT)
+# =========================================
+# playwright/.auth/
+storageState.json
+auth.json
+
+# =========================================
+# IDE (VS Code)
+# =========================================
+.vscode/
