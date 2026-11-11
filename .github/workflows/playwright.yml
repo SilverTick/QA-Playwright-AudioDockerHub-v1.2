@@ -78,7 +78,7 @@ jobs:
 
       # 7. Install Playwright Chromium
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       # 8. Execute Playwright tests
       - name: Run Playwright tests
