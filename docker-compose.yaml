@@ -1,0 +1,33 @@
+version: '3'
+services:
+  audio-hub:
+    build: ./deploy2docker
+    ports:
+      - 5010:5010
+    depends_on:
+      - mongodb  # ✅ Replaces deprecated "links"
+#     links:
+#       - mongodb
+  mongodb:
+    image: mongo
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    # volumes:
+    #   - mongo-data:/data/db
+  mongo-express:
+    image: mongo-express
+    restart: always # fixes MongoNetworkError when mongodb is not ready when mongo-express starts
+    ports:
+      - 8080:8081  # ✅ localhost:8080 will work
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=password
+#volumes:
+ #mongo-data:
+ #  driver: local

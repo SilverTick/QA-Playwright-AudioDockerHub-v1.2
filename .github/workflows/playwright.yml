@@ -1,5 +1,5 @@
 
-name: Playwright Tests
+name: Playwright Tests with Docker
 
 on:
   push:
@@ -8,31 +8,50 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   test:
-    name: Run Playwright Tests
-    timeout-minutes: 60
+    name: Docker Setup and Playwright Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
+      # 1. Checkout source code
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
+      # 3. Install project dependencies
+      - name: Install npm dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
+      # 4. Build and start Docker services
+      - name: Build and start Docker containers
+        run: docker compose -f docker-compose.yaml up -d --build
+
+      # 5. Verify Docker containers
+      - name: Check Docker containers
+        run: |
+          docker compose -f docker-compose.yaml ps
+          docker ps
+
+      # 6. Install Playwright Chromium
+      - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
+      # 7. Run Playwright tests
       - name: Run Playwright tests
         run: npx playwright test
 
+      # 8. Upload Allure results
       - name: Upload Allure results
         if: always()
         uses: actions/upload-artifact@v4
@@ -42,6 +61,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
+      # 9. Upload Playwright report if available
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
@@ -50,3 +70,13 @@ jobs:
           path: playwright-report/
           if-no-files-found: ignore
           retention-days: 30
+
+      # 10. Collect Docker logs if workflow fails
+      - name: Collect Docker logs
+        if: failure()
+        run: docker compose -f docker-compose.yaml logs --no-color
+
+      # 11. Stop Docker containers
+      - name: Stop Docker containers
+        if: always()
+        run: docker compose -f docker-compose.yaml down
