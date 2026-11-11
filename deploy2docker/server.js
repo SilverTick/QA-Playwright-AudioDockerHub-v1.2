@@ -171,7 +171,7 @@ app.post('/api/login', async (req, res) => {
 /**
  * updateusername
  */
-app.get('/api/updateusername/',async (req,res)=>{
+app.patch('/api/updateusername/',async (req,res)=>{
   const newusername = req.query.newusername;
   const oldusername = req.query.oldusername;
   console.log("Get update username request:",oldusername,newusername);
@@ -194,7 +194,7 @@ app.get('/api/updateusername/',async (req,res)=>{
 /**
  * update Password
  */
-app.get('/api/updatepassword/',async (req,res)=>{
+app.patch('/api/updatepassword/',async (req,res)=>{
   const username = req.query.username;
   const password = req.query.password;
   console.log("Get update password request:",username,password);

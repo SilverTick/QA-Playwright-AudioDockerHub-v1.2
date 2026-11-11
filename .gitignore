@@ -4,7 +4,7 @@ playwright-report/
 blob-report/
 playwright/.cache/
 playwright/.auth/
-test-data/
+test-data/gitHub.json
 allure-results/
 allure-report/
 screenshots/

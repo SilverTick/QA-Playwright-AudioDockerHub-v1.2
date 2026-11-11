@@ -1,0 +1,22 @@
+{
+  "commonUser01": {
+    "username": "simsim",
+    "password": "Sim123456",
+    "cfmPassword": "Sim123456"
+  },
+  "commonUser02": {
+    "username": "simsim_api",
+    "password": "Sim123456api",
+    "cfmPassword": "Sim123456api"
+  },
+  "commonUser03": {
+    "username": "simsim_db",
+    "password": "Sim123456db",
+    "cfmPassword": "Sim123456db"
+  },
+  "adminUser01": {
+    "username": "adminadmin",
+    "password": "Admin123456",
+    "cfmPassword": "Admin123456"
+  }
+}

@@ -93,7 +93,7 @@ test.describe("API - CommonUser02 CRUD", {  tag: [tags.test.api, tags.module.use
 
     test(`API03: Update username for ${commonUser02.username}`, async ({ request }) => {
       // should not be GET request
-      const response = await request.get(
+      const response = await request.patch(
         `/api/updateusername?oldusername=${commonUser02.username}&newusername=${newUsername}`,
       );
       expect(response.status()).toBe(200);
@@ -118,7 +118,7 @@ test.describe("API - CommonUser02 CRUD", {  tag: [tags.test.api, tags.module.use
       });
       const passwordEncrypted = user?.password;
       // should not be GET request
-      const response = await request.get(
+      const response = await request.patch(
         `/api/updatepassword?username=${newUsername}&password=${newPassword}`,
       );
       expect(response.status()).toBe(200);

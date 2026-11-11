@@ -1,0 +1,22 @@
+{
+  "notification": {
+    "productAddedShoppingCart": "The product has been added to your shopping cart"
+  },
+  "termsOfService": {
+    "warning": "Please accept the terms of service before the next step.",
+    "title": "Conditions of use"
+  },
+  "cartTotal": {
+    "subTotal": "Sub-Total",
+    "shippingMethodFee": "Shipping",
+    "paymentMethodFee": "Payment method additional fee",
+    "taxFee": "Tax",
+    "total": "Total",
+    "orderTotal": "Order Total"
+  },
+  "completedOrder": {
+    "title": "Your order has been successfully processed!",
+    "orderNo": "Order number: ",
+    "orderNoURL": "Click here for order details."
+  }
+}

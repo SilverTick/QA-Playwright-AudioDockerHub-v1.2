@@ -1,0 +1,26 @@
+{
+  "smartPhoneCashOnDelivery": {
+    "searchInput": "phone",
+    "productItem1": "Smartphone",
+    "productItem1Price": "100",
+    "productItem1Quantity": "1",
+    "shippingMethod": "Ground",
+    "shippingMethodFee": "0",
+    "paymentMethod": "Cash On Delivery (COD)",
+    "paymentMethodFee": "7",
+    "paymentInformation": "You will pay by COD",
+    "taxFee": "0"
+  },
+  "laptopCashOnDelivery": {
+    "searchInput": "laptop",
+    "productItem1": "14.1-inch Laptop",
+    "productItem1Price": "1590",
+    "productItem1Quantity": "1",
+    "shippingMethod": "Ground",
+    "shippingMethodFee": "0",
+    "paymentMethod": "Cash On Delivery (COD)",
+    "paymentMethodFee": "7",
+    "paymentInformation": "You will pay by COD",
+    "taxFee": "0"
+  }
+}
