@@ -13,6 +13,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: allure-pages
+  cancel-in-progress: false
+
 jobs:
   test:
     name: Docker Deployment and Playwright Tests
@@ -45,7 +49,7 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      # 4. Build Docker environment
+      # 4. Build and start Docker environment
       - name: Build and start Docker containers
         run: docker compose -f docker-compose.yaml up -d --build
 
@@ -53,17 +57,17 @@ jobs:
       - name: Check Docker containers
         run: docker compose ps
 
-      # 6. Wait for application and database
+      # 6. Wait for AudioHub application
       - name: Wait for AudioHub application
         shell: bash
         run: |
-          echo "Waiting for AudioHub and MongoDB..."
+          echo "Waiting for AudioHub..."
 
           for i in {1..60}; do
             if curl -fsS --connect-timeout 3 \
               http://127.0.0.1:5010/api/checkusername/ci-health \
               -o /dev/null; then
-              echo "Application is ready!"
+              echo "AudioHub is ready!"
               exit 0
             fi
 
@@ -78,11 +82,21 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install chromium
 
-      # 8. Run all Playwright tests
+      # 8. Execute Playwright tests
       - name: Run Playwright tests
         run: npx playwright test
 
-      # 9. Save raw Allure results
+      # 9. Collect Docker logs if anything failed
+      - name: Collect Docker logs
+        if: failure()
+        run: docker compose logs --no-color
+
+      # 10. Stop Docker environment
+      - name: Stop Docker containers
+        if: always()
+        run: docker compose down
+
+      # 11. Upload raw Allure results
       - name: Upload Allure results
         if: always()
         uses: actions/upload-artifact@v4
@@ -92,17 +106,20 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
-      # 10. Collect Docker logs on failure
-      - name: Collect Docker logs
-        if: failure()
-        run: docker compose logs --no-color
-
-      # 11. Stop Docker environment
-      - name: Stop Docker containers
+      # 12. Upload Playwright failure evidence
+      - name: Upload Playwright test artifacts
         if: always()
-        run: docker compose down
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-artifacts-${{ github.run_number }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
 
-      # 12. Restore previous Allure history
+      # 13. Restore previous Allure history
+      # First run: gh-pages may not exist yet.
       - name: Load Allure history
         if: always() && github.event_name != 'pull_request'
         continue-on-error: true
@@ -111,12 +128,7 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      # 13. Prepare history directory
-      - name: Prepare Allure history
-        if: always()
-        run: mkdir -p gh-pages
-
-      # 14. Generate interactive Allure HTML report
+      # 14. Generate Allure HTML report
       - name: Generate Allure report
         id: allure_report
         if: always()
@@ -126,7 +138,23 @@ jobs:
           allure_results: allure-results
           allure_history: allure-history
 
-      # 15. Upload generated HTML report
+      # 15. Verify generated report
+      - name: Verify Allure HTML output
+        if: always()
+        run: |
+          echo "Checking generated Allure report..."
+
+          if [ -f allure-history/index.html ]; then
+            echo "SUCCESS: Allure HTML report generated."
+            find allure-history -maxdepth 2 -type f | head -30
+          else
+            echo "ERROR: Allure index.html not found."
+            ls -la
+            ls -la allure-results || true
+            exit 1
+          fi
+
+      # 16. Upload generated HTML report
       - name: Upload Allure HTML artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -136,7 +164,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
-      # 16. Publish Allure report to GitHub Pages
+      # 17. Publish report to GitHub Pages
       - name: Publish Allure report
         if: always() && github.event_name != 'pull_request' && steps.allure_report.outcome == 'success'
         uses: peaceiris/actions-gh-pages@v4
