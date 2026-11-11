@@ -1,5 +1,5 @@
 
-name: Playwright Tests with Docker
+name: Playwright Tests with Docker and Allure
 
 on:
   push:
@@ -11,12 +11,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
     name: Docker Deployment and Playwright Tests
-
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -24,9 +23,14 @@ jobs:
       ENV: sit
       BASE_URL: http://127.0.0.1:5010
 
+      TEST_USER_01_PASSWORD: ${{ secrets.TEST_USER_01_PASSWORD }}
+      TEST_USER_02_PASSWORD: ${{ secrets.TEST_USER_02_PASSWORD }}
+      TEST_USER_03_PASSWORD: ${{ secrets.TEST_USER_03_PASSWORD }}
+      TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+
     steps:
 
-      # 1. Checkout repository
+      # 1. Checkout source code
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -37,69 +41,106 @@ jobs:
           node-version: 22
           cache: npm
 
-      # 3. Install Playwright dependencies
+      # 3. Install dependencies
       - name: Install npm dependencies
         run: npm ci
 
-      # 4. Build and start Docker environment
+      # 4. Build Docker environment
       - name: Build and start Docker containers
         run: docker compose -f docker-compose.yaml up -d --build
 
-      # 5. Verify Docker containers
+      # 5. Check Docker containers
       - name: Check Docker containers
         run: docker compose ps
 
-      # 6. Wait for MongoDB-dependent application endpoint
+      # 6. Wait for application and database
       - name: Wait for AudioHub application
         shell: bash
         run: |
           echo "Waiting for AudioHub and MongoDB..."
 
           for i in {1..60}; do
-
-            if curl -fsS \
-              --connect-timeout 3 \
+            if curl -fsS --connect-timeout 3 \
               http://127.0.0.1:5010/api/checkusername/ci-health \
               -o /dev/null; then
-
-              echo "AudioHub and MongoDB are ready!"
+              echo "Application is ready!"
               exit 0
-
             fi
 
-            echo "Waiting for application... ($i/60)"
+            echo "Waiting... ($i/60)"
             sleep 5
-
           done
 
-          echo "Application failed to become ready."
           docker compose logs --no-color
           exit 1
 
-      # 7. Install Playwright Chromium
-      - name: Install Playwright browsers
+      # 7. Install Chromium
+      - name: Install Playwright Chromium
         run: npx playwright install chromium
 
-      # 8. Execute Playwright tests
+      # 8. Run all Playwright tests
       - name: Run Playwright tests
         run: npx playwright test
 
-      # 9. Upload Allure results
+      # 9. Save raw Allure results
       - name: Upload Allure results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-results
+          name: allure-results-${{ github.run_number }}
           path: allure-results/
           if-no-files-found: ignore
           retention-days: 30
 
-      # 10. Collect Docker logs if something fails
+      # 10. Collect Docker logs on failure
       - name: Collect Docker logs
         if: failure()
         run: docker compose logs --no-color
 
-      # 11. Shutdown Docker environment
+      # 11. Stop Docker environment
       - name: Stop Docker containers
         if: always()
         run: docker compose down
+
+      # 12. Restore previous Allure history
+      - name: Load Allure history
+        if: always() && github.event_name != 'pull_request'
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      # 13. Prepare history directory
+      - name: Prepare Allure history
+        if: always()
+        run: mkdir -p gh-pages
+
+      # 14. Generate interactive Allure HTML report
+      - name: Generate Allure report
+        id: allure_report
+        if: always()
+        uses: simple-elf/allure-report-action@v1.12.0
+        with:
+          gh_pages: gh-pages
+          allure_results: allure-results
+          allure_history: allure-history
+
+      # 15. Upload generated HTML report
+      - name: Upload Allure HTML artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-html-report-${{ github.run_number }}
+          path: allure-history/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      # 16. Publish Allure report to GitHub Pages
+      - name: Publish Allure report
+        if: always() && github.event_name != 'pull_request' && steps.allure_report.outcome == 'success'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
