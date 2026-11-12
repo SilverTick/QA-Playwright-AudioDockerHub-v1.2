@@ -142,5 +142,11 @@ test.describe("API - CommonUser02 CRUD", {  tag: [tags.test.api, tags.module.use
       const response = await request.delete(`/api/deleteaccount/${user?._id}`);
       expect(response.status()).toBe(200);
       expect(response.ok()).toBeTruthy();
+      const body = await response.json();
+      expect(body).toEqual({
+        message: "Account deleted successfully",
+      });
+      console.log(body);
+      console.log(JSON.stringify(body, null, 2));
     });
 });

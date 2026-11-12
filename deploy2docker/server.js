@@ -130,60 +130,23 @@ app.get('/api/checkusername/:username',async (req,res)=>{
 });
 
 app.post('/api/signup', async (req, res) => {
-  try {
-    const { username, password } = req.body;
 
-    // 1. Validate input
-    if (!username || !password) {
-      return res.status(400).json({
-        message: 'Username and password are required'
-      });
-    }
-
-    // 2. Check existing user
-    const existingUser = await User.findOne({ username }).exec();
-
+  const { username, password } = req.body;
+  
+  const existingUser = await User.findOne({ username }).exec();
+  console.log("existingUser:",existingUser)
     if (existingUser) {
-      return res.status(409).json({
-        message: 'User already exists'
-      });
+      return res.status(409).json({ message: 'User already exists' });
     }
 
-    // 3. Hash password
-    const salt = await bcrypt.genSalt(12);
+    const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
-
-    // 4. Create user
-    const user = new User({
-      username,
-      password: hashedPassword
-    });
-
+  
+    const user = new User({ username, password: hashedPassword });
     await user.save();
-
-    // 5. Generate JWT
-    const token = jwt.sign(
-      { username: user.username },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    // 6. Return token
-    return res.status(201).json({ token });
-
-  } catch (error) {
-    console.error('Signup error:', error);
-
-    if (error.code === 11000) {
-      return res.status(409).json({
-        message: 'User already exists'
-      });
-    }
-
-    return res.status(500).json({
-      message: 'Internal server error'
-    });
-  }
+  
+    const token = jwt.sign({ username }, 'secret');
+    res.status(201).json({ token });
 });
 
 app.post('/api/login', async (req, res) => {
@@ -305,9 +268,7 @@ app.delete('/api/deleteaccount/:id', async (req, res) => {
       return res.status(404).send({ error: 'User not found' });
     }
 
-    return res.status(200).json({
-      message: 'Account deleted successfully'
-    });
+    return res.status(200).json({ message: 'Account deleted successfully' });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: 'Server error' });
