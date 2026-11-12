@@ -38,7 +38,7 @@ test.describe("API - CommonUser02 CRUD", {  tag: [tags.test.api, tags.module.use
         },
       });
       const responseTime = Date.now() - startTime;
-      expect(response.status()).toBe(200);
+      expect(response.status()).toBe(201);
       expect(response.ok()).toBeTruthy();
       expect(responseTime).toBeLessThan(2000);
       expect(response.headers()["content-type"]).toContain("application/json");
@@ -140,6 +140,7 @@ test.describe("API - CommonUser02 CRUD", {  tag: [tags.test.api, tags.module.use
           username: newUsername,
         });
       const response = await request.delete(`/api/deleteaccount/${user?._id}`);
+      expect(response.status()).toBe(200);
       expect(response.ok()).toBeTruthy();
     });
 });
