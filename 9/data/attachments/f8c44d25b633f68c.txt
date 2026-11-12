@@ -1,0 +1,6 @@
+
+✅ simsim_db found in DB: {
+  _id: new ObjectId('6af5359e58ab74fcde2300b4'),
+  username: 'simsim_db',
+  password: '$2a$10$6mCJx90O.Y2cyZOlOC6RMuztR7X27Cte3gaekgkJtnstlIwfzwohu'
+}
