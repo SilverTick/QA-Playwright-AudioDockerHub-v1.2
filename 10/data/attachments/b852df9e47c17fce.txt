@@ -1,0 +1,6 @@
+
+✅ User updated in DB: {
+  _id: new ObjectId('6af53abb5573d049781f490e'),
+  username: 'simsim_dbz',
+  password: '$2a$10$V1dWyJkfEcDeZ5BjfxMKYeS3Pi8WL47.jjmk6NMTtGffXIjPIMi06'
+}

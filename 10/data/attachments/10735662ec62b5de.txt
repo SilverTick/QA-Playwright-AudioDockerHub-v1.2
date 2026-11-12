@@ -1,0 +1,8 @@
+{
+  message: 'Username update successed!',
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuZXd1c2VybmFtZSI6InNpbXNpbV9hcGl6IiwiaWF0IjoxNzk0NDU2MjUxfQ.fMXONHJYbEkt8EBLBwoM__u4M3bAGJZ55G0tJ7aXxvA'
+}
+{
+  "message": "Username update successed!",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuZXd1c2VybmFtZSI6InNpbXNpbV9hcGl6IiwiaWF0IjoxNzk0NDU2MjUxfQ.fMXONHJYbEkt8EBLBwoM__u4M3bAGJZ55G0tJ7aXxvA"
+}

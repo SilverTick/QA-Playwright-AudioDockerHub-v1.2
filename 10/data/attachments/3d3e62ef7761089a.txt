@@ -1,0 +1,4 @@
+{ message: 'Account deleted successfully' }
+{
+  "message": "Account deleted successfully"
+}
